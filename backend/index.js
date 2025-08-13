@@ -15,10 +15,12 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos estáticos desde el directorio raíz del proyecto
 app.use(express.static(path.join(__dirname, '..')));
 
-// Ruta de prueba
-app.get('/', (req, res) => {
+// Rutas de la API
+app.get('/backend', (req, res) => {
   res.json({ message: 'Servidor funcionando correctamente' });
 });
 
