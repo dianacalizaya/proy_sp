@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: sinfonia-politica    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '.'          # set this to the path to your web app project (root directory)
+  AZURE_WEBAPP_PACKAGE_PATH: '/home/runner/work/proy_sp'    # set this to the path to your web app project
   NODE_VERSION: '20.x'                    # set this to the node version to use
 
 jobs:
@@ -34,26 +34,20 @@ jobs:
       - name: Create output directory
         run: mkdir -p output
 
-      # Copiar archivos del backend y frontend
+      # Preparar archivos para el deployment
       - name: Copy all files
         run: |
-          # Listar contenido del directorio actual
-          echo "Contenido del directorio actual:"
-          ls -la
-          
-          # Crear estructura de directorios
-          mkdir -p output/backend
-          
-          # Copiar archivos frontend desde la raíz del repositorio
-          cp "index.html" output/ || echo "No se pudo copiar index.html"
-          cp "justificaciones.html" output/ || echo "No se pudo copiar justificaciones.html"
-          cp "mis-resultados.html" output/ || echo "No se pudo copiar mis-resultados.html"
-          cp -r "images" output/ || echo "No se pudo copiar images"
-          cp -r "scripts" output/ || echo "No se pudo copiar scripts"
-          cp -r "styles" output/ || echo "No se pudo copiar styles"
-          
-          # Copiar archivos del backend manteniendo la estructura
-          cp -r backend/* output/backend/
+          # Crear estructura base
+          mkdir -p output
+
+          # Copiar los HTML y carpetas de frontend
+          cp *.html output/
+          cp -r images output/
+          cp -r scripts output/
+          cp -r styles output/
+
+          # Copiar backend como una carpeta separada
+          cp -r backend output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -78,26 +72,24 @@ jobs:
 
       - name: Set up deployment
         run: |
-          # Crear directorio de despliegue
-          mkdir -p /home/runner/work/proy_sp/app
-          
-          # Copiar todos los archivos manteniendo la estructura
-          cp -r deploy/* /home/runner/work/proy_sp/app/
-          
-          # Instalar dependencias del backend en su propio directorio
-          cd /home/runner/work/proy_sp/app/backend
+          # Crear directorio de deployment
+          mkdir -p /home/runner/work/proy_sp
+
+          # Copiar todo al directorio final
+          cp -r deploy/* /home/runner/work/proy_sp/
+
+          # Instalar dependencias (en la carpeta backend donde está package.json)
+          cd /home/runner/work/proy_sp/backend
           npm ci --only=production
           
-      - name: Display structure of downloaded files
+      - name: Display deployment structure
         run: |
-          echo "Current directory structure:"
+          echo "Deployment directory structure:"
           ls -R /home/runner/work/proy_sp
-          echo "Backend directory contents:"
-          ls -la /home/runner/work/proy_sp/backend
+          echo "Package.json location:"
+          ls -la /home/runner/work/proy_sp/backend/package.json
           echo "Node.js version:"
           node --version
-          echo "Package.json contents:"
-          cat /home/runner/work/proy_sp/backend/package.json
           
       - name: 'Deploy to Azure WebApp'
         id: deploy-to-webapp
@@ -105,4 +97,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: /home/runner/work/proy_sp/app
+          package: /home/runner/work/proy_sp
