@@ -34,7 +34,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: backend
+          path: |
+            backend/
+            index.html
+            justificaciones.html
+            mis-resultados.html
+            images/
+            scripts/
+            styles/
           if-no-files-found: error
 
   deploy:
@@ -55,6 +62,8 @@ jobs:
         run: |
           mkdir -p /home/runner/work/proy_sp/backend
           cp -r backend/* /home/runner/work/proy_sp/backend/
+          cp -r index.html justificaciones.html mis-resultados.html /home/runner/work/proy_sp/
+          cp -r images scripts styles /home/runner/work/proy_sp/
           cd /home/runner/work/proy_sp/backend
           npm ci --only=production
           

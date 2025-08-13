@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -10,10 +15,35 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '..')));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ message: 'Servidor funcionando correctamente' });
+});
+
+// Ruta para verificar la conexión a la base de datos
+app.get('/api/status', async (req, res) => {
+  try {
+    const dbResult = await pool.query('SELECT NOW()');
+    res.json({
+      server: 'running',
+      database: 'connected',
+      time: dbResult.rows[0].now,
+      env: {
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      server: 'running',
+      database: 'error',
+      error: error.message
+    });
+  }
 });
 
 const pool = new Pool({
@@ -26,8 +56,12 @@ const pool = new Pool({
 
 // Endpoint para guardar datos demográficos
 app.post('/api/demographics', async (req, res) => {
-  const { user_id, age, gender, location } = req.body;
+  const { age, gender, department } = req.body;
   try {
+    const result = await pool.query(
+      'INSERT INTO demographics (age, gender, department) VALUES ($1, $2, $3) RETURNING id',
+      [age, gender, department]
+    );
     await pool.query(
       'INSERT INTO demographics (user_id, age, gender, location) VALUES ($1, $2, $3, $4)',
       [user_id, age, gender, location]
