@@ -37,16 +37,19 @@ jobs:
       # Copiar archivos del backend y frontend
       - name: Copy all files
         run: |
+          # Crear estructura de directorios
+          mkdir -p output
+          
           # Copiar archivos del backend
           cp -r backend/* output/
           
           # Copiar archivos frontend desde la raíz
-          cp "Base encuesta backend/index.html" output/
-          cp "Base encuesta backend/justificaciones.html" output/
-          cp "Base encuesta backend/mis-resultados.html" output/
-          cp -r "Base encuesta backend/images" output/
-          cp -r "Base encuesta backend/scripts" output/
-          cp -r "Base encuesta backend/styles" output/
+          cp index.html output/
+          cp justificaciones.html output/
+          cp mis-resultados.html output/
+          cp -r images output/
+          cp -r scripts output/
+          cp -r styles output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
