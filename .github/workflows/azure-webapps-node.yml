@@ -37,19 +37,23 @@ jobs:
       # Copiar archivos del backend y frontend
       - name: Copy all files
         run: |
+          # Listar contenido del directorio actual
+          echo "Contenido del directorio actual:"
+          ls -la
+          
           # Crear estructura de directorios
           mkdir -p output
           
+          # Copiar archivos frontend desde la raíz del repositorio
+          cp "../index.html" output/ || echo "No se pudo copiar index.html"
+          cp "../justificaciones.html" output/ || echo "No se pudo copiar justificaciones.html"
+          cp "../mis-resultados.html" output/ || echo "No se pudo copiar mis-resultados.html"
+          cp -r "../images" output/ || echo "No se pudo copiar images"
+          cp -r "../scripts" output/ || echo "No se pudo copiar scripts"
+          cp -r "../styles" output/ || echo "No se pudo copiar styles"
+          
           # Copiar archivos del backend
           cp -r backend/* output/
-          
-          # Copiar archivos frontend desde la raíz
-          cp index.html output/
-          cp justificaciones.html output/
-          cp mis-resultados.html output/
-          cp -r images output/
-          cp -r scripts output/
-          cp -r styles output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -74,11 +78,16 @@ jobs:
 
       - name: Set up deployment
         run: |
-          mkdir -p /home/runner/work/proy_sp/backend
-          cp -r backend/* /home/runner/work/proy_sp/backend/
-          cp -r index.html justificaciones.html mis-resultados.html /home/runner/work/proy_sp/
-          cp -r images scripts styles /home/runner/work/proy_sp/
-          cd /home/runner/work/proy_sp/backend
+          # Crear directorio de despliegue
+          mkdir -p /home/runner/work/proy_sp
+          
+          # Copiar todo el contenido
+          cp -r backend/* /home/runner/work/proy_sp/
+          cp -r ../index.html ../justificaciones.html ../mis-resultados.html /home/runner/work/proy_sp/
+          cp -r ../images ../scripts ../styles /home/runner/work/proy_sp/
+          
+          # Instalar dependencias
+          cd /home/runner/work/proy_sp
           npm ci --only=production
           
       - name: Display structure of downloaded files
@@ -98,4 +107,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: /home/runner/work/proy_sp/backend
+          package: /home/runner/work/proy_sp
