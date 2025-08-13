@@ -42,7 +42,7 @@ jobs:
           ls -la
           
           # Crear estructura de directorios
-          mkdir -p output
+          mkdir -p output/backend
           
           # Copiar archivos frontend desde la raíz del repositorio
           cp "index.html" output/ || echo "No se pudo copiar index.html"
@@ -52,8 +52,8 @@ jobs:
           cp -r "scripts" output/ || echo "No se pudo copiar scripts"
           cp -r "styles" output/ || echo "No se pudo copiar styles"
           
-          # Copiar archivos del backend
-          cp -r backend/* output/
+          # Copiar archivos del backend manteniendo la estructura
+          cp -r backend/* output/backend/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -81,11 +81,11 @@ jobs:
           # Crear directorio de despliegue
           mkdir -p /home/runner/work/proy_sp/app
           
-          # Copiar todos los archivos
+          # Copiar todos los archivos manteniendo la estructura
           cp -r deploy/* /home/runner/work/proy_sp/app/
           
-          # Instalar dependencias del backend
-          cd /home/runner/work/proy_sp/app
+          # Instalar dependencias del backend en su propio directorio
+          cd /home/runner/work/proy_sp/app/backend
           npm ci --only=production
           
       - name: Display structure of downloaded files
