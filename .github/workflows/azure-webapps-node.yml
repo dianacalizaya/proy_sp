@@ -29,19 +29,30 @@ jobs:
         run: |
           npm ci
           npm run build --if-present
+
+      # Crear directorio de salida
+      - name: Create output directory
+        run: mkdir -p output
+
+      # Copiar archivos del backend
+      - name: Copy backend files
+        run: cp -r backend/* output/
+
+      # Copiar archivos frontend
+      - name: Copy frontend files
+        run: |
+          cp index.html output/
+          cp justificaciones.html output/
+          cp mis-resultados.html output/
+          cp -r images output/
+          cp -r scripts output/
+          cp -r styles output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            backend/
-            index.html
-            justificaciones.html
-            mis-resultados.html
-            images/
-            scripts/
-            styles/
+          path: output
           if-no-files-found: error
 
   deploy:

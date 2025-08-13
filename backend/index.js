@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Servir archivos estáticos desde el directorio raíz del proyecto
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '../..')));
 
 // Rutas de la API
 app.get('/backend', (req, res) => {
