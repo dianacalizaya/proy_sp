@@ -11,6 +11,11 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.json({ message: 'Servidor funcionando correctamente' });
+});
+
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
