@@ -50,6 +50,19 @@ jobs:
         with:
           name: node-app
           path: .
+
+      - name: Install production dependencies
+        run: |
+          npm ci --only=production
+          
+      - name: Display structure of downloaded files
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          echo "Node.js version:"
+          node --version
+          echo "Package.json contents:"
+          cat package.json
           
       - name: 'Deploy to Azure WebApp'
         id: deploy-to-webapp
