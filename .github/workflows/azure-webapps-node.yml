@@ -35,19 +35,27 @@ jobs:
         run: mkdir -p output
 
       # Preparar archivos para el deployment
-      - name: Copy all files
+      - name: Copy frontend files
         run: |
-          # Crear estructura base
+          echo "Copiando archivos frontend..."
+          
+          # Crear directorio para el sitio web
           mkdir -p output
-
-          # Copiar los HTML y carpetas de frontend
-          cp *.html output/
+          
+          # Copiar archivo principal y otros HTML
+          echo "Copiando archivos HTML..."
+          cp index.html output/
+          cp justificaciones.html output/
+          cp mis-resultados.html output/
+          
+          # Copiar recursos estáticos
+          echo "Copiando recursos estáticos..."
           cp -r images output/
           cp -r scripts output/
           cp -r styles output/
-
-          # Copiar backend como una carpeta separada
-          cp -r backend output/
+          
+          echo "Verificando archivos copiados:"
+          ls -la output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -72,15 +80,17 @@ jobs:
 
       - name: Set up deployment
         run: |
-          # Crear directorio de deployment
-          mkdir -p /home/runner/work/proy_sp
-
-          # Copiar todo al directorio final
-          cp -r deploy/* /home/runner/work/proy_sp/
-
-          # Instalar dependencias (en la carpeta backend donde está package.json)
-          cd /home/runner/work/proy_sp/backend
-          npm ci --only=production
+          echo "Configurando el deployment..."
+          
+          # Crear directorio para el sitio web
+          mkdir -p /home/runner/work/proy_sp/site
+          
+          # Copiar archivos frontend primero
+          echo "Copiando archivos frontend al directorio de despliegue..."
+          cp -r deploy/* /home/runner/work/proy_sp/site/
+          
+          echo "Verificando estructura del sitio:"
+          ls -la /home/runner/work/proy_sp/site/
           
       - name: Display deployment structure
         run: |
@@ -97,4 +107,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: /home/runner/work/proy_sp
+          package: /home/runner/work/proy_sp/site
