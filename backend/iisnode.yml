@@ -1,0 +1,22 @@
+{
+    "httpErrors": {
+        "detailedErrors": true,
+        "tracing": {
+            "enabled": true
+        }
+    },
+    "logging": {
+        "enabled": true,
+        "directory": "..\\LogFiles\\iisnode",
+        "maxLogFiles": 100,
+        "maxLogFileSizeInKB": 128
+    },
+    "debuggingEnabled": true,
+    "debuggerPathSegment": "debug",
+    "maxLogFiles": 100,
+    "maxLogFileSizeInKB": 128,
+    "devErrorsEnabled": true,
+    "node_env": "production",
+    "nodeProcessCountPerApplication": 1,
+    "interceptor": "..\\app.js"
+}

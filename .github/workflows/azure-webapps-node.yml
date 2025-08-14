@@ -26,25 +26,43 @@ jobs:
         run: |
           echo "🔨 Preparando archivos para deployment..."
           
-          # Crear directorio de salida
+          # 1. Crear directorio de salida y copiar todo el proyecto
+          echo "📁 Copiando archivos..."
           mkdir -p dist
+          cp -r . dist/
           
-          # 1. Copiar frontend (archivos estáticos)
-          echo "📁 Copiando archivos frontend..."
-          cp -r public/* dist/
-          echo "Contenido copiado a dist:"
-          ls -la dist/
-          
-          # 2. Preparar backend
-          echo "📁 Configurando backend..."
-          mkdir -p dist/backend
-          cp backend/index.js dist/backend/
-          cp package*.json dist/
+          # 2. Limpiar archivos innecesarios
+          cd dist
+          rm -rf .git .github
           
           # 3. Instalar dependencias de producción
           echo "📦 Instalando dependencias..."
-          cd dist
-          npm install --omit=dev
+          npm ci --production
+          
+          # 4. Verificar estructura final
+          echo "✅ Verificando estructura final:"
+          echo "Archivos en raíz:"
+          ls -la
+          echo "Contenido de public/:"
+          ls -la public
+          echo "Contenido de backend/:"
+          ls -la backend
+          
+          # 5. Verificar que los archivos críticos existen
+          if [ ! -f "backend/index.js" ]; then
+            echo "❌ Error: No se encuentra backend/index.js"
+            exit 1
+          fi
+          if [ ! -f "public/index.html" ]; then
+            echo "❌ Error: No se encuentra public/index.html"
+            exit 1
+          fi
+          if [ ! -f "web.config" ]; then
+            echo "❌ Error: No se encuentra web.config"
+            exit 1
+          fi
+          
+          echo "✅ Todos los archivos críticos encontrados"
           
           # 4. Copiar web.config
           echo "📄 Copiando web.config..."
