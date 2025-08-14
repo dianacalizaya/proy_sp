@@ -97,3 +97,27 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+      - name: 'Wait for deployment'
+        run: |
+          echo "⏳ Esperando 30 segundos para que la aplicación se inicie..."
+          sleep 30
+
+      - name: 'Verify Health Check'
+        run: |
+          echo "🔍 Verificando health check..."
+          HEALTH_CHECK_URL="https://sinfonia-politica-dbemamf9hsfrfxb5.brazilsouth-01.azurewebsites.net/health"
+          
+          response=$(curl -s -w "\\n%{http_code}" $HEALTH_CHECK_URL)
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          
+          echo "Código HTTP: $http_code"
+          echo "Respuesta: $body"
+          
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Health check exitoso"
+          else
+            echo "❌ Health check falló"
+            exit 1
+          fi
