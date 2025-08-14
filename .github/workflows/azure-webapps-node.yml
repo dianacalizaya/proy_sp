@@ -32,6 +32,8 @@ jobs:
           # 1. Copiar frontend (archivos estáticos)
           echo "📁 Copiando archivos frontend..."
           cp -r public/* dist/
+          echo "Contenido copiado a dist:"
+          ls -la dist/
           
           # 2. Preparar backend
           echo "📁 Configurando backend..."
