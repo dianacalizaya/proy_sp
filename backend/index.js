@@ -1,15 +1,33 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 // Servir archivos estáticos desde la raíz
 app.use(express.static(path.join(__dirname, '..')));
 
 // Ruta de health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    time: new Date().toISOString()
+  });
+});
+
+// API endpoints temporales (sin base de datos)
+app.post('/api/demographics', (req, res) => {
+  res.status(200).json({ message: 'Datos recibidos correctamente' });
+});
+
+app.post('/api/answers', (req, res) => {
+  res.status(200).json({ message: 'Respuesta guardada correctamente' });
 });
 
 // Ruta principal - sirve index.html para todas las rutas no encontradas
@@ -43,46 +61,6 @@ app.get('/api/status', async (req, res) => {
       database: 'error',
       error: error.message
     });
-  }
-});
-
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 5432,
-});
-
-// Endpoint para guardar datos demográficos
-app.post('/api/demographics', async (req, res) => {
-  const { age, gender, department } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO demographics (age, gender, department) VALUES ($1, $2, $3) RETURNING id',
-      [age, gender, department]
-    );
-    await pool.query(
-      'INSERT INTO demographics (user_id, age, gender, location) VALUES ($1, $2, $3, $4)',
-      [user_id, age, gender, location]
-    );
-    res.status(201).json({ message: 'Datos demográficos guardados' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Endpoint para guardar respuestas
-app.post('/api/answers', async (req, res) => {
-  const { user_id, question_id, answer } = req.body;
-  try {
-    await pool.query(
-      'INSERT INTO answers (user_id, question_id, answer) VALUES ($1, $2, $3)',
-      [user_id, question_id, answer]
-    );
-    res.status(201).json({ message: 'Respuesta guardada' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 
