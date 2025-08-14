@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
 
       - name: Prepare deployment files
         run: |
@@ -44,7 +42,7 @@ jobs:
           # 3. Instalar dependencias de producción
           echo "📦 Instalando dependencias..."
           cd dist
-          npm ci --production
+          npm install --omit=dev
           
           # 4. Copiar web.config
           echo "📄 Copiando web.config..."
