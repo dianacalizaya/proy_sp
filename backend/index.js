@@ -16,8 +16,13 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos (HTML, CSS, JS) desde la raíz del proyecto
-app.use(express.static(path.join(__dirname, '..')));
+// Servir archivos estáticos desde la carpeta public
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Ruta principal - sirve index.html para todas las rutas no encontradas
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // Rutas de la API (todas bajo /api)
 app.get('/api', (req, res) => {
