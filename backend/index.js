@@ -1,23 +1,19 @@
 const express = require('express');
 const path = require('path');
-const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+console.log('Iniciando servidor...');
 
-// Servir archivos estáticos desde la raíz
-app.use(express.static(path.join(__dirname, '..')));
-
-// Ruta de health check
+// Ruta de health check - primera ruta para pruebas
 app.get('/health', (req, res) => {
+  console.log('Health check solicitado');
   res.status(200).json({ 
     status: 'OK', 
     message: 'Server is running',
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
+    env: process.env.NODE_ENV
   });
 });
 
@@ -64,6 +60,16 @@ app.get('/api/status', async (req, res) => {
   }
 });
 
+// Servir archivos estáticos y otras rutas después de confirmar que el servidor funciona
+app.use(express.static(path.join(__dirname, '..')));
+
+app.get('*', (req, res) => {
+  console.log(`Solicitud recibida para: ${req.url}`);
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
+
 app.listen(port, () => {
-  console.log(`Servidor backend escuchando en puerto ${port}`);
+  console.log(`Servidor backend iniciado en puerto ${port}`);
+  console.log(`Directorio actual: ${__dirname}`);
+  console.log(`Ruta a index.html: ${path.join(__dirname, '../index.html')}`);
 });
