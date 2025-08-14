@@ -33,12 +33,12 @@ jobs:
           
           # 1. Copiar frontend (archivos estáticos)
           echo "📁 Copiando archivos frontend..."
-          cp -r public dist/
+          cp -r public/* dist/
           
           # 2. Preparar backend
           echo "📁 Configurando backend..."
           mkdir -p dist/backend
-          cp backend/server.js dist/backend/
+          cp backend/index.js dist/backend/
           cp package*.json dist/
           
           # 3. Instalar dependencias de producción
