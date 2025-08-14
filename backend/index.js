@@ -1,19 +1,44 @@
 const express = require('express');
 const path = require('path');
+const os = require('os');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-console.log('Iniciando servidor...');
+// Log startup information
+console.log('=== INFORMACIÓN DE INICIO DEL SERVIDOR ===');
+console.log('Directorio actual:', __dirname);
+console.log('Versión de Node:', process.version);
+console.log('Sistema operativo:', os.platform());
+console.log('Variables de entorno:', Object.keys(process.env));
 
-// Ruta de health check - primera ruta para pruebas
+// Middleware para logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message });
+});
+
+// Ruta de health check con información detallada
 app.get('/health', (req, res) => {
   console.log('Health check solicitado');
   res.status(200).json({ 
     status: 'OK', 
     message: 'Server is running',
     time: new Date().toISOString(),
-    env: process.env.NODE_ENV
+    node_version: process.version,
+    env: process.env.NODE_ENV,
+    platform: os.platform(),
+    memory: process.memoryUsage(),
+    uptime: process.uptime(),
+    directory: __dirname,
+    files: fs.readdirSync(path.join(__dirname, '..')).filter(f => !f.startsWith('.')),
   });
 });
 
