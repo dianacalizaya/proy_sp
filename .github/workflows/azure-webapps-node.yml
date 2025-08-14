@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: sinfonia-politica    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '/home/runner/work/proy_sp/wwwroot'    # set this to the path to your web app project
+  AZURE_WEBAPP_PACKAGE_PATH: '.'          # set this to the path to your web app project
   NODE_VERSION: '20.x'                    # set this to the node version to use
 
 jobs:
@@ -22,48 +22,47 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'backend/package-lock.json'
+          cache-dependency-path: 'package-lock.json'
 
-      - name: npm install and build
+      - name: Prepare deployment files
         run: |
-          cd backend
-          npm ci
-          npm run build --if-present
-
-      # Crear directorio de salida
-      - name: Create output directory
-        run: mkdir -p output
-
-      # Preparar archivos para el deployment
-      - name: Setup deployment files
-        run: |
-          echo "Configurando estructura del proyecto..."
+          echo "🔨 Preparando archivos para deployment..."
           
-          # Crear estructura de directorios
-          mkdir -p output/public
-          mkdir -p output/backend
+          # Crear directorio de salida
+          mkdir -p dist
           
-          # Copiar archivos frontend a public
-          echo "Copiando archivos frontend..."
-          cp -r public/* output/public/
+          # 1. Copiar frontend (archivos estáticos)
+          echo "📁 Copiando archivos frontend..."
+          cp -r public dist/
           
-          # Copiar archivos backend
-          echo "Copiando archivos backend..."
-          cp backend/package*.json output/backend/
-          cp backend/index.js output/backend/
+          # 2. Preparar backend
+          echo "📁 Configurando backend..."
+          mkdir -p dist/backend
+          cp backend/server.js dist/backend/
+          cp package*.json dist/
           
-          # Instalar dependencias
-          cd output/backend
+          # 3. Instalar dependencias de producción
+          echo "📦 Instalando dependencias..."
+          cd dist
           npm ci --production
           
-          echo "Verificando estructura:"
-          ls -R output/
+          # 4. Copiar web.config
+          echo "📄 Copiando web.config..."
+          cp ../web.config .
+          
+          # 5. Verificar estructura final
+          echo "✅ Verificando estructura final:"
+          ls -la
+          echo "Contenido de public/:"
+          ls -la public
+          echo "Contenido de backend/:"
+          ls -la backend
         
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: output
+          name: app-files
+          path: dist
           if-no-files-found: error
 
   deploy:
@@ -74,33 +73,22 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-app
-          path: deploy
+          name: app-files
+          path: .
 
-      - name: Set up deployment
+      - name: Display deployment files
         run: |
-          echo "Configurando deployment..."
-          
-          # Crear estructura en wwwroot
-          mkdir -p /home/runner/work/proy_sp/wwwroot
-          
-          # Copiar todo manteniendo la estructura
-          cp -r deploy/* /home/runner/work/proy_sp/wwwroot/
-          
-          echo "Verificando estructura final:"
-          tree /home/runner/work/proy_sp/wwwroot || ls -R /home/runner/work/proy_sp/wwwroot
-          
-      - name: Display deployment structure
-        run: |
-          echo "Contenido del directorio wwwroot:"
-          ls -la /home/runner/work/proy_sp/wwwroot
+          echo "📁 Estructura del deployment:"
+          ls -R
           echo ""
-          echo "Verificando archivos principales:"
-          ls -l /home/runner/work/proy_sp/wwwroot/index.html
-          ls -l /home/runner/work/proy_sp/wwwroot/images/Logo\ SP-11.png
+          echo "📄 Verificando archivos principales:"
+          ls -l public/index.html
+          ls -l public/images/Logo\ SP-11.png
+          ls -l backend/server.js
+          ls -l web.config
           
       - name: 'Deploy to Azure WebApp'
         id: deploy-to-webapp
@@ -108,4 +96,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: /home/runner/work/proy_sp/wwwroot
+          package: .
