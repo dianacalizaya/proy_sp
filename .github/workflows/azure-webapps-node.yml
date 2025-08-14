@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: sinfonia-politica    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '/home/runner/work/proy_sp'    # set this to the path to your web app project
+  AZURE_WEBAPP_PACKAGE_PATH: '/home/runner/work/proy_sp/wwwroot'    # set this to the path to your web app project
   NODE_VERSION: '20.x'                    # set this to the node version to use
 
 jobs:
@@ -82,24 +82,23 @@ jobs:
         run: |
           echo "Configurando el deployment..."
           
-          # Crear directorio para el sitio web
-          mkdir -p /home/runner/work/proy_sp/site
+          # Crear directorio wwwroot para el sitio web (Azure usa esta convención)
+          mkdir -p /home/runner/work/proy_sp/wwwroot
           
-          # Copiar archivos frontend primero
-          echo "Copiando archivos frontend al directorio de despliegue..."
-          cp -r deploy/* /home/runner/work/proy_sp/site/
+          # Mover archivos directamente a wwwroot
+          mv deploy/* /home/runner/work/proy_sp/wwwroot/
           
-          echo "Verificando estructura del sitio:"
-          ls -la /home/runner/work/proy_sp/site/
+          echo "Verificando estructura final:"
+          ls -la /home/runner/work/proy_sp/wwwroot/
           
       - name: Display deployment structure
         run: |
-          echo "Deployment directory structure:"
-          ls -R /home/runner/work/proy_sp
-          echo "Package.json location:"
-          ls -la /home/runner/work/proy_sp/backend/package.json
-          echo "Node.js version:"
-          node --version
+          echo "Contenido del directorio wwwroot:"
+          ls -la /home/runner/work/proy_sp/wwwroot
+          echo ""
+          echo "Verificando archivos principales:"
+          ls -l /home/runner/work/proy_sp/wwwroot/index.html
+          ls -l /home/runner/work/proy_sp/wwwroot/images/Logo\ SP-11.png
           
       - name: 'Deploy to Azure WebApp'
         id: deploy-to-webapp
@@ -107,4 +106,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: /home/runner/work/proy_sp/site
+          package: /home/runner/work/proy_sp/wwwroot
