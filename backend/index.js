@@ -7,6 +7,11 @@ const port = process.env.PORT || 3001;
 // Servir archivos estáticos desde la raíz
 app.use(express.static(path.join(__dirname, '..')));
 
+// Ruta de health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
+});
+
 // Ruta principal - sirve index.html para todas las rutas no encontradas
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../index.html'));
