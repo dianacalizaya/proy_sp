@@ -35,27 +35,29 @@ jobs:
         run: mkdir -p output
 
       # Preparar archivos para el deployment
-      - name: Copy frontend files
+      - name: Setup deployment files
         run: |
+          echo "Configurando estructura del proyecto..."
+          
+          # Crear estructura de directorios
+          mkdir -p output/public
+          mkdir -p output/backend
+          
+          # Copiar archivos frontend a public
           echo "Copiando archivos frontend..."
+          cp -r public/* output/public/
           
-          # Crear directorio para el sitio web
-          mkdir -p output
+          # Copiar archivos backend
+          echo "Copiando archivos backend..."
+          cp backend/package*.json output/backend/
+          cp backend/index.js output/backend/
           
-          # Copiar archivo principal y otros HTML
-          echo "Copiando archivos HTML..."
-          cp index.html output/
-          cp justificaciones.html output/
-          cp mis-resultados.html output/
+          # Instalar dependencias
+          cd output/backend
+          npm ci --production
           
-          # Copiar recursos estáticos
-          echo "Copiando recursos estáticos..."
-          cp -r images output/
-          cp -r scripts output/
-          cp -r styles output/
-          
-          echo "Verificando archivos copiados:"
-          ls -la output/
+          echo "Verificando estructura:"
+          ls -R output/
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -80,16 +82,16 @@ jobs:
 
       - name: Set up deployment
         run: |
-          echo "Configurando el deployment..."
+          echo "Configurando deployment..."
           
-          # Crear directorio wwwroot para el sitio web (Azure usa esta convención)
+          # Crear estructura en wwwroot
           mkdir -p /home/runner/work/proy_sp/wwwroot
           
-          # Mover archivos directamente a wwwroot
-          mv deploy/* /home/runner/work/proy_sp/wwwroot/
+          # Copiar todo manteniendo la estructura
+          cp -r deploy/* /home/runner/work/proy_sp/wwwroot/
           
           echo "Verificando estructura final:"
-          ls -la /home/runner/work/proy_sp/wwwroot/
+          tree /home/runner/work/proy_sp/wwwroot || ls -R /home/runner/work/proy_sp/wwwroot
           
       - name: Display deployment structure
         run: |
