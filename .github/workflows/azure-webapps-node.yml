@@ -83,9 +83,9 @@ jobs:
           ls -R
           echo ""
           echo "📄 Verificando archivos principales:"
-          ls -l public/index.html
-          ls -l public/images/Logo\ SP-11.png
-          ls -l backend/server.js
+          ls -l index.html
+          ls -l images/Logo\ SP-11.png
+          ls -l backend/index.js
           ls -l web.config
           
       - name: 'Deploy to Azure WebApp'
